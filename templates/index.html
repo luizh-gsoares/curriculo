@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Criador de currículo</title>
+    <meta charset=" UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
+<body>
+<!-- Navbar-->
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/"> CV Builder </a>
+        <button
+                class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+                aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-collapse collapse" id="navbarColor01">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                {% if not usuario %}
+                    <li class="nav-item">
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#registerModal"><i class="fa-solid fa-address-card"></i> Registrar</a>
+                    </li>
+                {% elif usuario %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Navbar-->
+
+<!-- Modal Login -->
+<div class="modal" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Faça o login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('login') }}" method="post">
+                    <!-- Email input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="email">Endereço de Email</label>
+                        <input type="email" id="email" name="email" class="form-control"/>
+                    </div>
+
+                    <!-- Password input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="senha">Senha</label>
+                        <input type="password" id="senha" name="senha" class="form-control"/>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Login -->
+
+<!-- Modal Cadastro -->
+<div class="modal" id="registerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar um novo usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('register') }}" method="post">
+                    <!-- Email input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="email">Endereço de Email</label>
+                        <input type="email" id="email" name="email" class="form-control"/>
+                    </div>
+
+                    <!-- Password input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="senha">Senha</label>
+                        <input type="password" id="senha" name="senha" class="form-control"/>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Cadastro -->
+
+
+<!-- Mensagem de alerta -->
+{% if mensagem %}
+    <div id="autoCloseAlert" class="alert alert-dismissible alert-{{ tipo }} position-fixed bottom-0 end-0 mb-3 me-3"
+         style="z-index: 9999;">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        {{ mensagem }}
+    </div>
+{% endif %}
+<!-- Mensagem de alerta -->
+
+<!-- JavaScript -->
+<script>
+    window.onload = function () {
+        setTimeout(function () {
+            const alertElement = document.getElementById('autoCloseAlert');
+            const bsAlert = new bootstrap.Alert(alertElement);
+            bsAlert.close();
+        }, 5000); // close the alert after 5000 milliseconds (5 seconds)
+    };
+</script>
+<!-- JavaScript -->
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
