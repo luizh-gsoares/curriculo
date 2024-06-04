@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, session
+﻿from flask import Flask, render_template, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -26,6 +26,7 @@ class Usuario(db.Model):
 class DadosPessoais(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     nome = db.Column(db.String(128))
+    email = db.Column(db.String(128))
     titulo = db.Column(db.String(128))
     objetivo = db.Column(db.String(512))
     endereco = db.Column(db.String(128))
@@ -34,8 +35,9 @@ class DadosPessoais(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship('Usuario', foreign_keys=usuario_id)
 
-    def __init__(self, nome, titulo, objetivo, endereco, site, telefone, usuario_id):
+    def __init__(self, nome, email, titulo, objetivo, endereco, site, telefone, usuario_id):
         self.nome = nome
+        self.email = email
         self.titulo = titulo
         self.objetivo = objetivo
         self.endereco = endereco
@@ -48,7 +50,7 @@ class Formacao(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     curso = db.Column(db.String(128))
     instituicao = db.Column(db.String(128))
-    data = db.Column(db.String(128))
+    data = db.Column(db.Date())
     descricao = db.Column(db.String(512))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship('Usuario', foreign_keys=usuario_id)
@@ -65,7 +67,7 @@ class Experiencia(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     cargo = db.Column(db.String(128))
     empresa = db.Column(db.String(128))
-    data = db.Column(db.String(128))
+    data = db.Column(db.Date)
     descricao = db.Column(db.String(512))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship('Usuario', foreign_keys=usuario_id)
@@ -99,6 +101,7 @@ with app.app_context():
 
 # endregion
 
+# region Routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
     # Retorna a página inicial do site - Sem usuário logado
@@ -108,12 +111,78 @@ def index():
     # Retorna a página inicial do site - Com usuário logado
     elif (request.method == 'GET') and ('usuario' in session):
         usuario = Usuario.query.filter_by(email=session['usuario']).first()
-        formacoes = Formacao.query.filter_by(usuario_id=usuario.id).all()
-        experiencias = Experiencia.query.filter_by(usuario_id=usuario.id).all()
-        habilidades = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-        return render_template('index.html', usuario=usuario, formacoes=formacoes, experiencias=experiencias,
-                               habilidades=habilidades)
+        dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
+        formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
+        experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
+        habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+        return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
+                               experiencia=experiencia, habilidade=habilidade)
+    # Retorna a página inicial do site
     return render_template('index.html')
+
+
+@app.route('/curriculo', methods=['GET', 'POST'])
+def curriculo():
+    if request.method == 'GET':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
+                                   tipo='danger')
+        else:
+            usuario = Usuario.query.filter_by(email=session['usuario']).first()
+            dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
+            formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
+            experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
+            habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+            return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
+        
+
+@app.route('/add_dadospessoais', methods=['GET', 'POST'])
+def add_dadospessoais():
+    if request.method == 'GET':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado.',tipo='danger')
+        else:
+            return redirect('/')
+    
+    if request.method == 'POST':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado.',tipo='danger')
+        else:
+            # Recupera o usuário logado
+            usuario = Usuario.query.filter_by(email=session['usuario']).first()
+
+            # Adiciona os dados pessoais do usuário
+            nome = request.form['nome']
+            email = request.form['email']
+            titulo = request.form['titulo']
+            objetivo = request.form['objetivo']
+            endereco = request.form['endereco']
+            site = request.form['site']
+            telefone = request.form['telefone']
+
+            # Verifica se o usuário já possui dados pessoais cadastrados
+            dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
+
+            # Se existente, atualiza os dados e evita duplicidade
+            if dadospessoais:
+                dadospessoais.nome = nome
+                dadospessoais.email = email
+                dadospessoais.titulo = titulo
+                dadospessoais.objetivo = objetivo
+                dadospessoais.endereco = endereco
+                dadospessoais.site = site
+                dadospessoais.telefone = telefone
+                db.session.commit()
+
+            # Senão, cria um novo registro
+            else:
+                dadospessoais = DadosPessoais(nome, email, titulo, objetivo, endereco, site, telefone, usuario.id)
+                db.session.add(dadospessoais)
+                db.session.commit()
+                
+            return redirect('/')
+
+        return render_template('index.html')
 
 
 # region Region Auth
@@ -160,10 +229,13 @@ def logout():
         session.pop('usuario')
         return render_template('index.html')
     elif 'usuario' not in session:
-        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.', tipo='danger')
+        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
+                               tipo='danger')
 
 
 # endregion
+# endregion
+
 if __name__ == '__main__':
     db.create_all()
-    app.run()
+    app.run(debug=True)

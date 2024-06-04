@@ -1,1 +1,33 @@
-﻿
+﻿{% if usuario %}
+    <h1>{{ usuario.email }}</h1>
+{% endif %}
+
+{% if dadospessoais %}
+    <h2>{{ dadospessoais.nome }}</h2>
+    <p>{{ dadospessoais.titulo }}</p>
+    <p>{{ dadospessoais.objetivo }}</p>
+    <p>{{ dadospessoais.endereco }}</p>
+    <p>{{ dadospessoais.site }}</p>
+    <p>{{ dadospessoais.telefone }}</p>
+{% endif %}
+
+{% if formacao %}
+    <h3>Formação:</h3>
+    {% for f in formacao %}
+        <p>{{ f.curso }} at {{ f.instituicao }} on {{ f.data }}. Description: {{ f.descricao }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if experiencia %}
+    <h3>Experiência:</h3>
+    {% for e in experiencia %}
+        <p>{{ e.cargo }} at {{ e.empresa }} on {{ e.data }}. Description: {{ e.descricao }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if habilidade %}
+    <h3>Habilidades:</h3>
+    {% for h in habilidade %}
+        <p>{{ h.nome }}</p>
+    {% endfor %}
+{% endif %}

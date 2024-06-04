@@ -27,10 +27,12 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if not usuario %}
                     <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#loginModal"><i
+                                class="fa-solid fa-right-to-bracket"></i> Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#registerModal"><i class="fa-solid fa-address-card"></i> Registrar</a>
+                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#registerModal"><i
+                                class="fa-solid fa-address-card"></i> Registrar</a>
                     </li>
                 {% elif usuario %}
                     <li class="nav-item">
@@ -43,6 +45,166 @@
     </div>
 </nav>
 <!-- Navbar-->
+
+
+<!-- Conteúdo -->
+{% if usuario %}
+    <section class="container">
+        <div class="row">
+            <!-- Lado esquerdo -->
+            <div class="col col-6" style="max-height: 100vh; overflow-y: auto;">
+                <!-- Dados pessoais -->
+                <div class="mt-5">
+                    <h4> Dados pessoais </h4>
+
+                    <form action="{{ url_for('add_dadospessoais') }}" method="post">
+                        <div class="">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" name="nome" placeholder="Nome"
+                                       value="{{ dadospessoais.nome if dadospessoais else '' }}">
+                                <label> Nome</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="titulo"
+                                       placeholder="Título Profissional"
+                                       value="{{ dadospessoais.titulo if dadospessoais else '' }}">
+                                <label for="floatingInput"> Título Profissional</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="endereco"
+                                       placeholder="Endereço"
+                                       value="{{ dadospessoais.endereco if dadospessoais else '' }}">
+                                <label for="floatingInput"> Endereço</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="site"
+                                       placeholder="Site pessoal ou LinkedIn"
+                                       value="{{ dadospessoais.site if dadospessoais else '' }}">
+                                <label for="floatingInput">Site pessoal</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="telefone"
+                                       placeholder="Telefone"
+                                       value="{{ dadospessoais.telefone if dadospessoais else '' }}">
+                                <label for="floatingInput">Telefone </label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="email"
+                                       placeholder="Email" value="{{ dadospessoais.email if dadospessoais else '' }}">
+                                <label for="floatingInput"> Email</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" style="height: 120px;" id="floatingInput" rows="5"
+                                          name="objetivo">{{ dadospessoais.objetivo if dadospessoais else '' }}</textarea>
+                                <label for="floatingInput" class="form-label"> Objetivo </label>
+                                <button class="btn btn-primary" type="button"
+                                        style="position: absolute; top: 0; right: 0;"><i
+                                        class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+
+                        </div>
+                        <button class="btn btn-primary mt-3"> Salvar</button>
+
+                    </form>
+                </div>
+                <!-- Dados pessoais -->
+
+                <!-- Experiência profissional -->
+                <div class="mt-5">
+                    <h4> Experiência Profissional </h4>
+
+                    <form class="mt-3">
+                        {% for exp in experiencia %}
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="cargo"
+                                       placeholder="Cargo"
+                                       value="">
+                                <label for="floatingInput"> Cargo</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="empresa"
+                                       placeholder="Empresa">
+                                <label for="floatingInput"> Empresa</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="floatingInput" name="data"
+                                       placeholder="Data">
+                                <label for="floatingInput"> Data </label>
+                            </div>
+
+                            <div>
+                                <label for="floatingInput" class="form-label mt-4" name="descricao"> Descrição </label>
+                                <textarea class="form-control" id="floatingInput" rows="3"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary mt-3"> Adicionar experiência</button>
+                        {% endfor %}
+
+                    </form>
+                </div>
+                <!-- Experiência profissional -->
+
+                <!-- Formação acadêmica -->
+                <div class="mt-5">
+                    <h4> Formação Acadêmica </h4>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" name="curso" placeholder="Curso">
+                        <label for="floatingInput"> Curso</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" name="instituicao"
+                               placeholder="Instituição">
+                        <label for="floatingInput"> Instituição</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" name="data" placeholder="Data">
+                        <label for="floatingInput"> Data </label>
+                    </div>
+
+                    <div>
+                        <label for="floatingInput" class="form-label mt-4" name="descricao"> Descrição </label>
+                        <textarea class="form-control" id="floatingInput" rows="3"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary mt-3"> Adicionar formação</button>
+                </div>
+                <!-- Formação acadêmica -->
+
+                <!-- Habilidades -->
+                <div class="mt-5">
+                    <h4> Habilidades </h4>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="floatingInput" name="habilidade"
+                               placeholder="Habilidade">
+                        <label for="floatingInput"> Habilidade</label>
+                    </div>
+
+                    <button class="btn btn-primary mt-3"> Adicionar habilidade</button>
+                </div>
+                <!-- Habilidades -->
+            </div>
+            <!-- Lado direito -->
+
+            <div class="col col-6 d-flex justify-content-center align-items-center py-5">
+                <iframe class="shadow h-100 w-100" src="/curriculo"></iframe>
+            </div>
+
+        </div>
+    </section>
+{% endif %}
+<!-- Conteúdo -->
 
 <!-- Modal Login -->
 <div class="modal" id="loginModal" tabindex="-1">
@@ -71,8 +233,6 @@
                     <!-- Submit button -->
                     <button type="submit" class="btn btn-primary btn-block">Login</button>
                 </form>
-
-
             </div>
         </div>
     </div>
