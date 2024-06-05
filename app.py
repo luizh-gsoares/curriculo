@@ -50,7 +50,7 @@ class Formacao(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     curso = db.Column(db.String(128))
     instituicao = db.Column(db.String(128))
-    data = db.Column(db.Date())
+    data = db.Column(db.String(128))
     descricao = db.Column(db.String(512))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship('Usuario', foreign_keys=usuario_id)
@@ -67,7 +67,7 @@ class Experiencia(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     cargo = db.Column(db.String(128))
     empresa = db.Column(db.String(128))
-    data = db.Column(db.Date)
+    data = db.Column(db.String(128))
     descricao = db.Column(db.String(512))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship('Usuario', foreign_keys=usuario_id)
@@ -133,20 +133,21 @@ def curriculo():
             formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
             experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
             habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-            return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
-        
+            return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
+                                   experiencia=experiencia, habilidade=habilidade)
+
 
 @app.route('/add_dadospessoais', methods=['GET', 'POST'])
 def add_dadospessoais():
     if request.method == 'GET':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado.',tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado.', tipo='danger')
         else:
             return redirect('/')
-    
+
     if request.method == 'POST':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado.',tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado.', tipo='danger')
         else:
             # Recupera o usuário logado
             usuario = Usuario.query.filter_by(email=session['usuario']).first()
@@ -179,11 +180,136 @@ def add_dadospessoais():
                 dadospessoais = DadosPessoais(nome, email, titulo, objetivo, endereco, site, telefone, usuario.id)
                 db.session.add(dadospessoais)
                 db.session.commit()
-                
+
             return redirect('/')
 
         return render_template('index.html')
 
+
+@app.route('/add_experiencia', methods=['GET', 'POST'])
+def add_experiencia():
+    if request.method == 'GET':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+        else:
+            return redirect('/')
+    
+    if request.method == 'POST':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+
+        elif 'usuario' in session:
+            # Recupera o usuário logado
+            usuario = Usuario.query.filter_by(email=session['usuario']).first()
+
+            # Adiciona a experiência do usuário
+            id = request.form.get('id')
+            cargo = request.form['cargo']
+            empresa = request.form['empresa']
+            data = request.form['data']
+            descricao = request.form['descricao']
+
+            # Verifica se a experiência já existe pelo id
+            if id :
+                experiencia = Experiencia.query.filter_by(id=id).first()
+                experiencia.cargo = cargo
+                experiencia.empresa = empresa
+                experiencia.data = data
+                experiencia.descricao = descricao
+                db.session.commit()
+                return redirect('/')
+            else:
+                experiencia = Experiencia(cargo, empresa, data, descricao, usuario.id)
+                db.session.add(experiencia)
+                db.session.commit()
+                return redirect('/')
+        return render_template('index.html')
+
+
+@app.route('/delete_experiencia/<id>', methods=['GET', 'POST'])
+def delete_experiencia(id):
+    experiencia = Experiencia.query.filter_by(id=id).first()
+    db.session.delete(experiencia)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/add_formacao', methods=['GET', 'POST'])
+def add_formacao():
+    if request.method == 'GET':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+        else:
+            return redirect('/')
+    
+    if request.method == 'POST':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+
+        elif 'usuario' in session:
+            # Recupera o usuário logado
+            usuario = Usuario.query.filter_by(email=session['usuario']).first()
+
+            # Adiciona a formação do usuário
+            id = request.form.get('id')
+            curso = request.form['curso']
+            instituicao = request.form['instituicao']
+            data = request.form['data']
+            descricao = request.form['descricao']
+
+            # Verifica se a formação já existe pelo id
+            if id :
+                formacao = Formacao.query.filter_by(id=id).first()
+                formacao.curso = curso
+                formacao.instituicao = instituicao
+                formacao.data = data
+                formacao.descricao = descricao
+                db.session.commit()
+                return redirect('/')
+            else:
+                formacao = Formacao(curso, instituicao, data, descricao, usuario.id)
+                db.session.add(formacao)
+                db.session.commit()
+                return redirect('/')
+        return render_template('index.html')
+    
+@app.route('/delete_formacao/<id>', methods=['GET', 'POST'])
+def delete_formacao(id):
+    formacao = Formacao.query.filter_by(id=id).first()
+    db.session.delete(formacao)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/add_habilidade', methods=['GET', 'POST'])
+def add_habilidade():
+    if request.method == 'GET':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+        else:
+            return redirect('/')
+    
+    if request.method == 'POST':
+        if 'usuario' not in session:
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+
+        elif 'usuario' in session:
+            # Recupera o usuário logado
+            usuario = Usuario.query.filter_by(email=session['usuario']).first()
+
+            # Adiciona a habilidade do usuário
+            nome = request.form['nome']
+
+            habilidade = Habilidade(nome, usuario.id)
+            db.session.add(habilidade)
+            db.session.commit()
+            return redirect('/')
+        return render_template('index.html')
+    
+@app.route('/delete_habilidade/<id>', methods=['GET', 'POST'])
+def delete_habilidade(id):
+    habilidade = Habilidade.query.filter_by(id=id).first()
+    db.session.delete(habilidade)
+    db.session.commit()
+    return redirect('/')
 
 # region Region Auth
 @app.route('/login', methods=['GET', 'POST'])
@@ -193,9 +319,19 @@ def login():
         senha = request.form['senha']
         usuario = Usuario.query.filter_by(email=email, senha=senha).first()
         if usuario:
+            session.permanent = False
             session['usuario'] = email
-            return render_template('index.html', mensagem='Login realizado com sucesso.', tipo='success',
-                                   usuario=usuario)
+            return render_template('index.html',
+                                   mensagem='Login realizado com sucesso.',
+                                   tipo='success',
+                                   usuario=usuario,
+                                   dadospessoais=DadosPessoais.query.filter_by(usuario_id=usuario.id).first(),
+                                   formacao=Formacao.query.filter_by(usuario_id=usuario.id).order_by(
+                                       Formacao.data.desc()).all(),
+                                   experiencia=Experiencia.query.filter_by(usuario_id=usuario.id).order_by(
+                                       Experiencia.data.desc()).all(),
+                                   habilidade=Habilidade.query.filter_by(usuario_id=usuario.id).all()
+                                   )
         else:
             return render_template('index.html',
                                    mensagem='Usuário ou senha inválidos. Por favor, verifique e tente novamente.',
@@ -229,11 +365,13 @@ def logout():
         session.pop('usuario')
         return render_template('index.html')
     elif 'usuario' not in session:
-        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
+        return render_template('index.html',
+                               mensagem='Você não está logado. Acesso direto não é permitido.',
                                tipo='danger')
 
 
 # endregion
+
 # endregion
 
 if __name__ == '__main__':
