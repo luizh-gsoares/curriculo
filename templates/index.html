@@ -12,261 +12,273 @@
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
-<body>
+
 <!-- Navbar-->
-<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/"> CV Builder </a>
-        <button
-                class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
-                aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<body class="overflow-hidden">
+<div class="container">
+    <section class="container" style="padding-top: 72px;">
+        <nav class="navbar fixed-top navbar-expand-lg bg-primary" data-bs-theme="dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/"> CV Builder </a>
+                <button
+                        class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01"
+                        aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-        <div class="navbar-collapse collapse" id="navbarColor01">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                {% if not usuario %}
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#loginModal"><i
-                                class="fa-solid fa-right-to-bracket"></i> Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#registerModal"><i
-                                class="fa-solid fa-address-card"></i> Registrar</a>
-                    </li>
-                {% elif usuario %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
-                {% endif %}
+                <div class="navbar-collapse collapse" id="navbarColor01">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        {% if not usuario %}
+                            <li class="nav-item">
+                                <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#loginModal"><i
+                                        class="fa-solid fa-right-to-bracket"></i> Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#registerModal"><i
+                                        class="fa-solid fa-address-card"></i> Registrar</a>
+                            </li>
+                        {% elif usuario %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/logout">Logout</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </section>
+    <!-- Navbar-->
 
-            </ul>
-        </div>
-    </div>
-</nav>
-<!-- Navbar-->
 
+    <!-- Conteúdo -->
+    {% if usuario %}
+        <section class="container">
+            <div class="row">
+                <!-- Lado esquerdo -->
+                <div class="col col-6" style="height: 100vh; overflow-y: auto;">
+                    <!-- Dados pessoais -->
+                    <div class="mt-5">
+                        <h4> Dados pessoais </h4>
 
-<!-- Conteúdo -->
-{% if usuario %}
-    <section class="container">
-        <div class="row">
-            <!-- Lado esquerdo -->
-            <div class="col col-6" style="max-height: 100vh; overflow-y: auto;">
-                <!-- Dados pessoais -->
-                <div class="mt-5">
-                    <h4> Dados pessoais </h4>
+                        <form action="{{ url_for('add_dadospessoais') }}" method="post">
+                            <div class="">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" name="nome" placeholder="Nome"
+                                           value="{{ dadospessoais.nome if dadospessoais else '' }}">
+                                    <label> Nome</label>
+                                </div>
 
-                    <form action="{{ url_for('add_dadospessoais') }}" method="post">
-                        <div class="">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" name="nome" placeholder="Nome"
-                                       value="{{ dadospessoais.nome if dadospessoais else '' }}">
-                                <label> Nome</label>
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="floatingInput" name="titulo"
+                                           placeholder="Título Profissional"
+                                           value="{{ dadospessoais.titulo if dadospessoais else '' }}">
+                                    <label for="floatingInput"> Título Profissional</label>
+                                </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="floatingInput" name="titulo"
-                                       placeholder="Título Profissional"
-                                       value="{{ dadospessoais.titulo if dadospessoais else '' }}">
-                                <label for="floatingInput"> Título Profissional</label>
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="floatingInput" name="endereco"
+                                           placeholder="Endereço"
+                                           value="{{ dadospessoais.endereco if dadospessoais else '' }}">
+                                    <label for="floatingInput"> Endereço</label>
+                                </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="floatingInput" name="endereco"
-                                       placeholder="Endereço"
-                                       value="{{ dadospessoais.endereco if dadospessoais else '' }}">
-                                <label for="floatingInput"> Endereço</label>
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="floatingInput" name="site"
+                                           placeholder="Site pessoal ou LinkedIn"
+                                           value="{{ dadospessoais.site if dadospessoais else '' }}">
+                                    <label for="floatingInput">Site pessoal</label>
+                                </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="floatingInput" name="site"
-                                       placeholder="Site pessoal ou LinkedIn"
-                                       value="{{ dadospessoais.site if dadospessoais else '' }}">
-                                <label for="floatingInput">Site pessoal</label>
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="floatingInput" name="telefone"
+                                           placeholder="Telefone"
+                                           value="{{ dadospessoais.telefone if dadospessoais else '' }}">
+                                    <label for="floatingInput">Telefone </label>
+                                </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="floatingInput" name="telefone"
-                                       placeholder="Telefone"
-                                       value="{{ dadospessoais.telefone if dadospessoais else '' }}">
-                                <label for="floatingInput">Telefone </label>
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="floatingInput" name="email"
+                                           placeholder="Email" value="{{ dadospessoais.email if dadospessoais else '' }}">
+                                    <label for="floatingInput"> Email</label>
+                                </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="floatingInput" name="email"
-                                       placeholder="Email" value="{{ dadospessoais.email if dadospessoais else '' }}">
-                                <label for="floatingInput"> Email</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
+                                <div class="form-floating mb-3">
                                 <textarea class="form-control" style="height: 120px;" id="floatingInput" rows="5"
                                           name="objetivo">{{ dadospessoais.objetivo if dadospessoais else '' }}</textarea>
-                                <label for="floatingInput" class="form-label"> Objetivo </label>
-                                <button class="btn btn-primary" type="button"
-                                        style="position: absolute; top: 0; right: 0;"><i
-                                        class="fa-solid fa-pen-to-square"></i></button>
+                                    <label for="floatingInput" class="form-label"> Objetivo </label>
+                                    <button class="btn btn-primary" type="button" style="position: absolute; top: 0; right: 0;"><i
+                                            class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+
                             </div>
+                            <button class="btn btn-primary mt-3"> Salvar</button>
 
-                        </div>
-                        <button class="btn btn-primary mt-3"> Salvar</button>
-
-                    </form>
-                </div>
-                <!-- Dados pessoais -->
-
-                <!-- Experiência profissional -->
-                <div class="mt-2">
-                    <h4> Experiência Profissional </h4>
-
-                    {% for exp in experiencia %}
-                        <div class="card mt-3">
-                            <div class="card-body">
-                                <p class="visually-hidden">{{ exp.id }}</p>
-                                <h5 class="card-title">{{ exp.cargo }}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">{{ exp.empresa }}</h6>
-                                <p class="card-text">{{ exp.data }}</p>
-                                <p class="card-text">{{ exp.descricao }}</p>
-                                <a onclick="showForm('experiencia'), editarExperiencia('{{ exp.cargo }}', '{{ exp.empresa }}', '{{ exp.data }}', '{{ exp.descricao }}', '{{ exp.id }}')"
-                                   class="card-link"> Editar </a>
-                                <a href="{{ url_for('delete_experiencia', id = exp.id) }}" class="card-link">Excluir</a>
-                            </div>
-                        </div>
-                    {% endfor %}
-
-                    <form class="mt-3" action="{{ url_for('add_experiencia') }}" method="post" id="experiencia_form" style="display: none;">
-                        <hr class="mt-3">
-                        <p> Digite as informações da experiência profissional :</p>
-
-                        <input type="hidden" id="exp_id" name="id">
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="exp_cargo" name="cargo" placeholder="Cargo">
-                            <label for="floatingInput"> Cargo</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="exp_empresa" name="empresa"
-                                   placeholder="Empresa">
-                            <label for="floatingInput"> Empresa</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="exp_data" name="data"
-                                   placeholder="Data">
-                            <label for="floatingInput"> Data </label>
-                        </div>
-
-                        <div>
-                            <label for="floatingInput" class="form-label mt-4"> Descrição </label>
-                            <textarea class="form-control" id="exp_descricao" rows="3" name="descricao"></textarea>
-                        </div>
-
-                        <button class="btn btn-primary mt-3"> Salvar</button>
-                    </form>
-
-                    <div class="py-3">
-                        <button class="btn btn-success" onclick="showForm('experiencia')">Adicionar Experiência</button>
+                        </form>
                     </div>
-                </div>
-                <!-- Experiência profissional -->
+                    <!-- Dados pessoais -->
 
-                <!-- Formação acadêmica -->
-                <div class="mt-2">
-                    <h4> Formação Acadêmica </h4>
+                    <!-- Experiência profissional -->
+                    <div class="mt-2">
+                        <h4> Experiência Profissional </h4>
 
-                    {% for form in formacao %}
-                        <div class="card mt-3">
-                            <div class="card-body">
-                                <p class="visually-hidden">{{ form.id }}</p>
-                                <h5 class="card-title mb-2">{{ form.curso }}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">{{ form.instituicao }}</h6>
-                                <p class="card-text">{{ form.data }}</p>
-                                <p class="card-text">{{ form.descricao }}</p>
-                                <a onclick="showForm('formacao'), editarFormacao('{{ form.curso }}', '{{ form.instituicao }}', '{{ form.data }}', '{{ form.descricao }}', '{{ form.id }}')"
-                                   class="card-link"> Editar</a>
-                                <a href="{{ url_for('delete_formacao', id = form.id) }}" class="card-link">Excluir</a>
-                            </div>
-                        </div>
-                    {% endfor %}
-
-                    <form class="mt-3" action="{{ url_for('add_formacao') }}" method="post" id="formacao_form" style="display: none;">
-
-                        <hr class="mt-3">
-                        <p> Digite as informações da formação acadêmica :</p>
-
-                        <input type="hidden" id="for_id" name="id">
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="for_curso" name="curso" placeholder="Curso">
-                            <label for="floatingInput"> Curso</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="for_instituicao" name="instituicao"
-                                   placeholder="Instituição">
-                            <label for="floatingInput"> Instituição</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="for_data" name="data" placeholder="Data">
-                            <label for="floatingInput"> Data </label>
-                        </div>
-
-                        <div>
-                            <label for="floatingInput" class="form-label mt-4"> Descrição </label>
-                            <textarea class="form-control" id="for_descricao" rows="3" name="descricao"></textarea>
-                        </div>
-
-                        <button class="btn btn-primary mt-3"> Salvar</button>
-                    </form>
-
-                    <div class="py-3">
-                        <button class="btn btn-success" onclick="showForm('formacao')">Adicionar Formação</button>
-                    </div>
-                </div>
-                <!-- Formação acadêmica -->
-
-                <!-- Habilidades -->
-                <div class="mt-2">
-                    <h4> Habilidades </h4>
-
-                    <div class="d-flex justify-content-start row row-cols-4 py-1 px-1">
-                        {% for hab in habilidade %}
-                            <div class="py-1 px-1">
-                                <div class="col align-items-center card ">
-                                    <p class="mb-0">{{ hab.nome }}</p>
-                                    <a href="{{ url_for('delete_habilidade', id = hab.id) }}" class="">Excluir</a>
-                                    <p class="visually-hidden">{{ hab.id }}</p>
+                        {% for exp in experiencia %}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <p class="visually-hidden">{{ exp.id }}</p>
+                                    <h5 class="card-title">{{ exp.cargo }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ exp.empresa }}</h6>
+                                    <p class="card-text">{{ exp.data }}</p>
+                                    <p class="card-text">{{ exp.descricao }}</p>
+                                    <a onclick="showForm('experiencia'), editarExperiencia('{{ exp.cargo }}', '{{ exp.empresa }}', '{{ exp.data }}', '{{ exp.descricao }}', '{{ exp.id }}')"
+                                       class="card-link"> Editar </a>
+                                    <a href="{{ url_for('delete_experiencia', id = exp.id) }}" class="card-link">Excluir</a>
                                 </div>
                             </div>
                         {% endfor %}
+
+                        <form class="mt-3" action="{{ url_for('add_experiencia') }}" method="post" id="experiencia_form" style="display: none;">
+                            <hr class="mt-3">
+                            <p> Digite as informações da experiência profissional :</p>
+
+                            <input type="hidden" id="exp_id" name="id">
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="exp_cargo" name="cargo" placeholder="Cargo">
+                                <label for="floatingInput"> Cargo</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="exp_empresa" name="empresa"
+                                       placeholder="Empresa">
+                                <label for="floatingInput"> Empresa</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="exp_data" name="data"
+                                       placeholder="Data">
+                                <label for="floatingInput"> Data </label>
+                            </div>
+
+                            <div>
+                                <label for="floatingInput" class="form-label mt-4"> Descrição </label>
+                                <textarea class="form-control" id="exp_descricao" rows="3" name="descricao"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary mt-3"> Salvar</button>
+                        </form>
+
+                        <div class="py-3">
+                            <button class="btn btn-success" onclick="showForm('experiencia')">Adicionar Experiência</button>
+                        </div>
+                    </div>
+                    <!-- Experiência profissional -->
+
+                    <!-- Formação acadêmica -->
+                    <div class="mt-2">
+                        <h4> Formação Acadêmica </h4>
+
+                        {% for form in formacao %}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <p class="visually-hidden">{{ form.id }}</p>
+                                    <h5 class="card-title mb-2">{{ form.curso }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ form.instituicao }}</h6>
+                                    <p class="card-text">{{ form.data }}</p>
+                                    <p class="card-text">{{ form.descricao }}</p>
+                                    <a onclick="showForm('formacao'), editarFormacao('{{ form.curso }}', '{{ form.instituicao }}', '{{ form.data }}', '{{ form.descricao }}', '{{ form.id }}')"
+                                       class="card-link"> Editar</a>
+                                    <a href="{{ url_for('delete_formacao', id = form.id) }}" class="card-link">Excluir</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <form class="mt-3" action="{{ url_for('add_formacao') }}" method="post" id="formacao_form" style="display: none;">
+
+                            <hr class="mt-3">
+                            <p> Digite as informações da formação acadêmica :</p>
+
+                            <input type="hidden" id="for_id" name="id">
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="for_curso" name="curso" placeholder="Curso">
+                                <label for="floatingInput"> Curso</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="for_instituicao" name="instituicao"
+                                       placeholder="Instituição">
+                                <label for="floatingInput"> Instituição</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="for_data" name="data" placeholder="Data">
+                                <label for="floatingInput"> Data </label>
+                            </div>
+
+                            <div>
+                                <label for="floatingInput" class="form-label mt-4"> Descrição </label>
+                                <textarea class="form-control" id="for_descricao" rows="3" name="descricao"></textarea>
+                            </div>
+
+                            <button class="btn btn-primary mt-3"> Salvar</button>
+                        </form>
+
+                        <div class="py-3">
+                            <button class="btn btn-success" onclick="showForm('formacao')">Adicionar Formação</button>
+                        </div>
+                    </div>
+                    <!-- Formação acadêmica -->
+
+                    <!-- Habilidades -->
+                    <div class="mt-2 mb-5">
+                        <h4> Habilidades </h4>
+
+                        <div class="d-flex justify-content-start row row-cols-4 py-1 px-1">
+                            {% for hab in habilidade %}
+                                <div class="py-1 px-1">
+                                    <div class="col align-items-center card ">
+                                        <p class="mb-0">{{ hab.nome }}</p>
+                                        <a href="{{ url_for('delete_habilidade', id = hab.id) }}" class="">Excluir</a>
+                                        <p class="visually-hidden">{{ hab.id }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="pb-5">
+                            <form class="mt-3" action="{{ url_for('add_habilidade') }}" method="post">
+                                <p> Digite uma nova habilidade :</p>
+
+                                <div class="row row-cols-2">
+                                    <div class="col col-8 form-floating">
+                                        <input type="text" class="form-control" id="hab_nome" name="nome" placeholder="Habilidade">
+                                        <label for="floatingInput "> Habilidade</label>
+                                    </div>
+
+                                    <div class="col col-4 d-flex align-items-center">
+                                        <button class="btn btn-primary "> Adicionar Skill</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Habilidades -->
+
+                <!-- Lado direito -->
+                <div class="col col-6">
+                    <div class="row py-4">
+                        <h5 class="col col-9">Visualização do currículo</h5>
+                        <button class=" col col-3 btn btn-primary" onclick="printCurriculo()">Imprimir</button>
                     </div>
 
-                    <form class="mt-3" action="{{ url_for('add_habilidade') }}" method="post">
-                        <p> Digite uma nova habilidade :</p>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="hab_nome" name="nome" placeholder="Habilidade">
-                            <label for="floatingInput"> Habilidade</label>
-                        </div>
-
-                        <class class="py-3">
-                            <button class="btn btn-primary"> Adicionar</button>
-                        </class>
-                    </form>
+                    <iframe id="frame" class="shadow overflow-y-auto" src="/curriculo" width="100%" height="80%"></iframe>
                 </div>
+                <!-- Lado direito -->
             </div>
-            <!-- Habilidades -->
-
-            <!-- Lado direito -->
-            <div class="col col-6 d-flex justify-content-center align-items-center py-5">
-                <iframe class="shadow h-100 w-100" src="/curriculo" width="300px" height="400px"></iframe>
-            </div>
-            <!-- Lado direito -->
-        </div>
-    </section>
-{% endif %}
+        </section>
+    {% endif %}
+</div>
 <!-- Conteúdo -->
 
 <!-- Modal Login -->
@@ -384,6 +396,12 @@
         } else if (id == 'formacao') {
             document.getElementById('formacao_form').style.display = 'block';
         }
+    }
+
+    // Imprime o currículo
+    function printCurriculo() {
+        var iframe = document.querySelector('iframe');
+        iframe.contentWindow.print();
     }
 </script>
 </body>
