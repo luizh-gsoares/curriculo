@@ -1,4 +1,6 @@
-﻿from flask import Flask, render_template, request, session, redirect, url_for
+﻿from abc import abstractmethod, ABC
+
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -6,36 +8,59 @@ app = Flask(__name__)
 # region Configurações
 app.secret_key = '4N4K1N5KYW4LK3R'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///curriculo.sqlite3'
-db = SQLAlchemy(app)
 app.app_context().push()
+
+
+# endregion
+
+# region  Padrão de Projeto Criacional - Singleton para o BD
+class Database:
+    _instance = None
+
+    def __new__(cls, app):
+        if cls._instance is None:
+            cls._instance = super(Database, cls).__new__(cls)
+            cls._instance.db = SQLAlchemy(app)
+        return cls._instance
+
+
+# Criação da instância do banco de dados usando Singleton
+db = Database(app).db
 
 
 # endregion
 
 # region Models
 class Usuario(db.Model):
-    id = db.Column('id', db.Integer, primary_key=True)
-    email = db.Column(db.String(128), unique=True)
-    senha = db.Column(db.String(20))
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    senha = db.Column(db.String(100), nullable=False)
 
     def __init__(self, email, senha):
         self.email = email
         self.senha = senha
 
 
-class DadosPessoais(db.Model):
-    id = db.Column('id', db.Integer, primary_key=True)
-    nome = db.Column(db.String(128))
-    email = db.Column(db.String(128))
-    titulo = db.Column(db.String(128))
-    objetivo = db.Column(db.String(512))
-    endereco = db.Column(db.String(128))
-    site = db.Column(db.String(128))
-    telefone = db.Column(db.String(128))
+class BaseModel(db.Model):
+    __abstract__ = True
+    id = db.Column(db.Integer, primary_key=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
-    usuario = db.relationship('Usuario', foreign_keys=usuario_id)
+
+    def __init__(self, usuario_id):
+        self.usuario_id = usuario_id
+
+
+class DadosPessoais(BaseModel, db.Model):
+    nome = db.Column(db.String(100))
+    email = db.Column(db.String(100))
+    titulo = db.Column(db.String(100))
+    objetivo = db.Column(db.String(500))
+    endereco = db.Column(db.String(200))
+    site = db.Column(db.String(100))
+    telefone = db.Column(db.String(20))
 
     def __init__(self, nome, email, titulo, objetivo, endereco, site, telefone, usuario_id):
+        super().__init__(usuario_id)
         self.nome = nome
         self.email = email
         self.titulo = titulo
@@ -43,52 +68,103 @@ class DadosPessoais(db.Model):
         self.endereco = endereco
         self.site = site
         self.telefone = telefone
-        self.usuario_id = usuario_id
 
 
-class Formacao(db.Model):
-    id = db.Column('id', db.Integer, primary_key=True)
-    curso = db.Column(db.String(128))
-    instituicao = db.Column(db.String(128))
-    data = db.Column(db.String(128))
-    descricao = db.Column(db.String(512))
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
-    usuario = db.relationship('Usuario', foreign_keys=usuario_id)
+class Formacao(BaseModel, db.Model):
+    curso = db.Column(db.String(100))
+    instituicao = db.Column(db.String(100))
+    data = db.Column(db.String(20))
+    descricao = db.Column(db.String(500))
 
     def __init__(self, curso, instituicao, data, descricao, usuario_id):
+        super().__init__(usuario_id)
         self.curso = curso
         self.instituicao = instituicao
         self.data = data
         self.descricao = descricao
-        self.usuario_id = usuario_id
 
 
-class Experiencia(db.Model):
-    id = db.Column('id', db.Integer, primary_key=True)
-    cargo = db.Column(db.String(128))
-    empresa = db.Column(db.String(128))
-    data = db.Column(db.String(128))
-    descricao = db.Column(db.String(512))
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
-    usuario = db.relationship('Usuario', foreign_keys=usuario_id)
+class Experiencia(BaseModel, db.Model):
+    cargo = db.Column(db.String(100))
+    empresa = db.Column(db.String(100))
+    data = db.Column(db.String(20))
+    descricao = db.Column(db.String(500))
 
     def __init__(self, cargo, empresa, data, descricao, usuario_id):
+        super().__init__(usuario_id)
         self.cargo = cargo
         self.empresa = empresa
         self.data = data
         self.descricao = descricao
-        self.usuario_id = usuario_id
 
 
-class Habilidade(db.Model):
-    id = db.Column('id', db.Integer, primary_key=True)
-    nome = db.Column(db.String(128))
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
-    usuario = db.relationship('Usuario', foreign_keys=usuario_id)
+class Habilidade(BaseModel, db.Model):
+    nome = db.Column(db.String(100))
 
     def __init__(self, nome, usuario_id):
+        super().__init__(usuario_id)
         self.nome = nome
-        self.usuario_id = usuario_id
+
+
+# endregion
+
+# region Padrão de Projeto Estrutural - Decorator
+class CurriculoBase(ABC):
+    @abstractmethod
+    def render(self):
+        pass
+
+
+class CurriculoPadrao(CurriculoBase):
+    def __init__(self, dadospessoais, formacao, experiencia, habilidade):
+        self.dadospessoais = dadospessoais
+        self.formacao = formacao
+        self.experiencia = experiencia
+        self.habilidade = habilidade
+
+    def render(self):
+        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao, experiencia=self.experiencia, habilidade=self.habilidade)
+
+
+class CurriculoDecorator(CurriculoBase):
+    def __init__(self, curriculo):
+        self.curriculo = curriculo
+
+    def render(self):
+        return self.curriculo.render()
+
+
+class ColorDecorator(CurriculoDecorator):
+    def __init__(self, curriculo, color):
+        super().__init__(curriculo)
+        self.color = color
+
+    def render(self):
+        rendered_curriculo = super().render()
+        # Adicione lógica para aplicar a cor ao currículo renderizado
+        return rendered_curriculo
+
+
+class FontDecorator(CurriculoDecorator):
+    def __init__(self, curriculo, font):
+        super().__init__(curriculo)
+        self.font = font
+
+    def render(self):
+        rendered_curriculo = super().render()
+        # Adicione lógica para aplicar a fonte ao currículo renderizado
+        return rendered_curriculo
+
+
+class SizeDecorator(CurriculoDecorator):
+    def __init__(self, curriculo, size):
+        super().__init__(curriculo)
+        self.size = size
+
+    def render(self):
+        rendered_curriculo = super().render()
+        # Adicione lógica para aplicar o tamanho ao currículo renderizado
+        return rendered_curriculo
 
 
 # endregion
@@ -104,37 +180,56 @@ with app.app_context():
 # region Routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # Retorna a página inicial do site - Sem usuário logado
-    if (request.method == 'GET') and ('usuario' not in session):
-        return render_template('index.html')
-
-    # Retorna a página inicial do site - Com usuário logado
-    elif (request.method == 'GET') and ('usuario' in session):
-        usuario = Usuario.query.filter_by(email=session['usuario']).first()
-        dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
-        formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
-        experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
-        habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-        return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
-                               experiencia=experiencia, habilidade=habilidade)
-    # Retorna a página inicial do site
-    return render_template('index.html')
-
-
-@app.route('/curriculo', methods=['GET', 'POST'])
-def curriculo():
     if request.method == 'GET':
-        if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
-                                   tipo='danger')
-        else:
+        if 'usuario' in session:
             usuario = Usuario.query.filter_by(email=session['usuario']).first()
             dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
             formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
             experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
             habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-            return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
-                                   experiencia=experiencia, habilidade=habilidade)
+            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
+        return render_template('index.html')
+
+
+@app.route('/curriculo', methods=['GET', 'POST'])
+def curriculo():
+    if 'usuario' not in session:
+        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.', tipo='danger')
+    else:
+        usuario = Usuario.query.filter_by(email=session['usuario']).first()
+        dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
+        formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
+        experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
+        habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+
+        # Cria o currículo base
+        curriculo_base = CurriculoPadrao(dadospessoais, formacao, experiencia, habilidade)
+
+        # Adiciona customizações ao currículo, se houver
+        if 'color' in session:
+            curriculo_base = ColorDecorator(curriculo_base, session['color'])
+        if 'font' in session:
+            curriculo_base = FontDecorator(curriculo_base, session['font'])
+        if 'size' in session:
+            curriculo_base = SizeDecorator(curriculo_base, session['size'])
+
+        # Renderiza o currículo
+        rendered_curriculo = curriculo_base.render()
+        return rendered_curriculo
+
+    return render_template('index.html', mensagem='Você não está logado.', tipo='danger')
+
+
+@app.route('/customizacao', methods=['POST'])
+def custom_curriculo():
+    if 'usuario' in session:
+        # Recebe a customização do currículo e salva na sessão para renderização
+        session['color'] = request.form.get('color')
+        session['font'] = request.form.get('font')
+        session['size'] = request.form.get('size')
+        return redirect('/')
+    else:
+        return redirect('/')
 
 
 @app.route('/add_dadospessoais', methods=['GET', 'POST'])
@@ -193,7 +288,7 @@ def add_experiencia():
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
         else:
             return redirect('/')
-    
+
     if request.method == 'POST':
         if 'usuario' not in session:
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
@@ -210,7 +305,7 @@ def add_experiencia():
             descricao = request.form['descricao']
 
             # Verifica se a experiência já existe pelo id
-            if id :
+            if id:
                 experiencia = Experiencia.query.filter_by(id=id).first()
                 experiencia.cargo = cargo
                 experiencia.empresa = empresa
@@ -233,6 +328,7 @@ def delete_experiencia(id):
     db.session.commit()
     return redirect('/')
 
+
 @app.route('/add_formacao', methods=['GET', 'POST'])
 def add_formacao():
     if request.method == 'GET':
@@ -240,7 +336,7 @@ def add_formacao():
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
         else:
             return redirect('/')
-    
+
     if request.method == 'POST':
         if 'usuario' not in session:
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
@@ -257,7 +353,7 @@ def add_formacao():
             descricao = request.form['descricao']
 
             # Verifica se a formação já existe pelo id
-            if id :
+            if id:
                 formacao = Formacao.query.filter_by(id=id).first()
                 formacao.curso = curso
                 formacao.instituicao = instituicao
@@ -271,13 +367,15 @@ def add_formacao():
                 db.session.commit()
                 return redirect('/')
         return render_template('index.html')
-    
+
+
 @app.route('/delete_formacao/<id>', methods=['GET', 'POST'])
 def delete_formacao(id):
     formacao = Formacao.query.filter_by(id=id).first()
     db.session.delete(formacao)
     db.session.commit()
     return redirect('/')
+
 
 @app.route('/add_habilidade', methods=['GET', 'POST'])
 def add_habilidade():
@@ -286,7 +384,7 @@ def add_habilidade():
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
         else:
             return redirect('/')
-    
+
     if request.method == 'POST':
         if 'usuario' not in session:
             return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
@@ -303,13 +401,15 @@ def add_habilidade():
             db.session.commit()
             return redirect('/')
         return render_template('index.html')
-    
+
+
 @app.route('/delete_habilidade/<id>', methods=['GET', 'POST'])
 def delete_habilidade(id):
     habilidade = Habilidade.query.filter_by(id=id).first()
     db.session.delete(habilidade)
     db.session.commit()
     return redirect('/')
+
 
 # region Region Auth
 @app.route('/login', methods=['GET', 'POST'])
@@ -363,6 +463,7 @@ def register():
 def logout():
     if 'usuario' in session:
         session.pop('usuario')
+        session.clear()
         return render_template('index.html')
     elif 'usuario' not in session:
         return render_template('index.html',
@@ -376,4 +477,5 @@ def logout():
 
 if __name__ == '__main__':
     db.create_all()
+    session.clear()
     app.run(debug=True)
