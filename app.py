@@ -1,7 +1,7 @@
 ﻿from abc import abstractmethod, ABC
-
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import datetime
 
 app = Flask(__name__)
 
@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.secret_key = '4N4K1N5KYW4LK3R'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///curriculo.sqlite3'
 app.app_context().push()
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=10)
 
 
 # endregion
@@ -109,13 +110,7 @@ class Habilidade(BaseModel, db.Model):
 # endregion
 
 # region Padrão de Projeto Estrutural - Decorator
-class CurriculoBase(ABC):
-    @abstractmethod
-    def render(self):
-        pass
-
-
-class CurriculoPadrao(CurriculoBase):
+class Curriculo:
     def __init__(self, dadospessoais, formacao, experiencia, habilidade):
         self.dadospessoais = dadospessoais
         self.formacao = formacao
@@ -123,11 +118,11 @@ class CurriculoPadrao(CurriculoBase):
         self.habilidade = habilidade
 
     def render(self):
-        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao,
-                               experiencia=self.experiencia, habilidade=self.habilidade)
+        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao, experiencia=self.experiencia,
+                               habilidade=self.habilidade)
 
 
-class CurriculoDecorator(CurriculoBase):
+class CurriculoDecorator(Curriculo):
     def __init__(self, curriculo):
         self.curriculo = curriculo
 
@@ -141,8 +136,9 @@ class ColorDecorator(CurriculoDecorator):
         self.color = color
 
     def render(self):
-        rendered_curriculo = super().render()
-        return rendered_curriculo + f"<style>body {{ background-color: {self.color}; }}</style>"
+        rendered = super().render()
+        return rendered + f"<div style='color: {self.color};'>{super().render()}</div>"
+
 
 class FontDecorator(CurriculoDecorator):
     def __init__(self, curriculo, font):
@@ -150,9 +146,8 @@ class FontDecorator(CurriculoDecorator):
         self.font = font
 
     def render(self):
-        rendered_curriculo = super().render()
-        return rendered_curriculo + f"<style>body {{ font-family: {self.font}; }}</style>"
-
+        rendered = super().render()
+        return rendered + f"<div style='font-family: {self.font};'>{super().render()}</div>"
 
 
 class SizeDecorator(CurriculoDecorator):
@@ -161,9 +156,8 @@ class SizeDecorator(CurriculoDecorator):
         self.size = size
 
     def render(self):
-        rendered_curriculo = super().render()
-        return rendered_curriculo + f"<style>body {{ font-size: {self.size}; }}</style>"
-
+        rendered = super().render()
+        return rendered + f"<div style='font-size: {self.size};'>{super().render()}</div>"
 
 # endregion
 
@@ -185,64 +179,65 @@ def index():
             formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
             experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
             habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
-                                   experiencia=experiencia, habilidade=habilidade)
+            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
         return render_template('index.html')
 
 
 @app.route('/curriculo', methods=['GET', 'POST'])
 def curriculo():
-    if 'usuario' not in session:
-        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
-                               tipo='danger')
-    else:
-        usuario = Usuario.query.filter_by(email=session['usuario']).first()
-        dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
-        formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
-        experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
-        habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+    # Verifica se a sessão de customizações existe, se não, cria uma nova com os valores padrão
+    if 'customizations' not in session:
+        session['customizations'] = [
+            ('color', '#000000'),
+            ('font', 'Times New Roman, sans-serif'),
+            ('size', '16px')
+        ]
 
-        # Cria o currículo base
-        curriculo_base = CurriculoPadrao(dadospessoais, formacao, experiencia, habilidade)
-
-        # Renderiza o currículo
-        rendered_curriculo = curriculo_base.render()
-
-        return rendered_curriculo
-
-    return render_template('index.html', mensagem='Você não está logado.', tipo='danger')
-
-
-@app.route('/customizacao', methods=['POST'])
-def custom_curriculo():
-    if 'usuario' not in session:
-        return redirect('/')
-
-    data = request.get_json()
-    customization_type = data.get('type')
-    customization_value = data.get('value')
-
+    # Recupera o usuário logado
     usuario = Usuario.query.filter_by(email=session['usuario']).first()
     dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
     formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
     experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
     habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+    
+    # Cria o currículo
+    curriculo = Curriculo(dadospessoais, formacao, experiencia, habilidade)
 
-    # Cria o currículo base
-    curriculo_base = CurriculoPadrao(dadospessoais, formacao, experiencia, habilidade)
+    return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade,
+                           scustomizations=session['customizations'])
 
-    # Aplica customização
-    if customization_type == 'color':
-        curriculo_base = ColorDecorator(curriculo_base, customization_value)
-    elif customization_type == 'font':
-        curriculo_base = FontDecorator(curriculo_base, customization_value)
-    elif customization_type == 'size':
-        curriculo_base = SizeDecorator(curriculo_base, customization_value)
 
-    # Renderiza o currículo customizado
-    rendered_curriculo = curriculo_base.render()
+@app.route('/customizacao/<tipo>', methods=['GET', 'POST'])
+def customizacao(tipo):
+    if 'customizations' not in session:
+        session['customizations'] = []
 
-    return jsonify({'curriculo': rendered_curriculo})
+    # Adiciona a customização na sessão de acordo com o tipo, mas não permite duplicidade de customizações
+    if tipo == 'color':
+        session['customizations'] = [custom for custom in session['customizations'] if custom[0] != 'color']
+        session['customizations'].append(('color', request.form['color']))
+    elif tipo == 'font':
+        session['customizations'] = [custom for custom in session['customizations'] if custom[0] != 'font']
+        session['customizations'].append(('font', request.form['font']))
+    elif tipo == 'size':
+        session['customizations'] = [custom for custom in session['customizations'] if custom[0] != 'size']
+        session['customizations'].append(('size', request.form['size']))
+
+    # Marca a sessão como modificada para que as alterações sejam salvas
+    session.modified = True
+
+    # caso teste
+    print(session['customizations'])
+
+    # Redireciona para a página inicial
+    return redirect('/')
+
+
+@app.route('/reset_customizacao', methods=['POST'])
+def reset_customizacao():
+    # Remove as customizações da sessão
+    session.pop('customizations', None)
+    return redirect('/')
 
 
 @app.route('/add_dadospessoais', methods=['GET', 'POST'])

@@ -55,181 +55,66 @@
             <div class="row">
                 <!-- Lado esquerdo -->
                 <div class="col col-6" style="height: 100vh; overflow-y: auto">
-                    <!--
-                        <form action="/customizacao" method="post">
-                            <div class="mt-1">
-                                <h4>Customização</h4>
-
-                                <div class="mt-3">
+                    <div>
+                        <div class="mt-1">
+                            <h4>Customização</h4>
+                            <div class="mt-3">
+                                <form method="post" action="{{ url_for('customizacao', tipo = 'color') }}">
                                     <label>Cores : </label>
                                     <div class="row row-cols-6 m-auto justify-content-between">
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(239, 68, 68)" tabindex="0" value="#ef4444"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(248, 113, 113)" tabindex="0" value="#f87171"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(251, 146, 60)" tabindex="0" value="#fbb23c"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(249, 115, 22)" tabindex="0" value="#f97316"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(245, 158, 11)" tabindex="0" value="#f59e0b"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(251, 191, 36)" tabindex="0" value="#fbbf24"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(34, 197, 94)" tabindex="0" value="#22c55e"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(21, 128, 61)" tabindex="0" value="#15803d"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(56, 189, 248)" tabindex="0" value="#38bdf8"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(14, 165, 233)" tabindex="0" value="#0ea5e9"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(129, 140, 248)" tabindex="0" value="#818cf8"/>
-                                        <input class="btn btn-lg col" type="submit" name="color"
-                                               style="background-color: rgb(99, 102, 241)" tabindex="0" value="#6366f1"/>
+                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(129, 140, 248)"
+                                                value="#818cf8"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(99, 102, 241)"
+                                                value="#6366f1"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(249, 115, 22)"
+                                                value="#f97316"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(239, 68, 68)"
+                                                value="#ef4444"></button>
                                     </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <label>Fontes :</label>
-                                    <div class="row row-cols-2">
-                                        <input class="btn col" type="submit" name="font" value="Arial, sans-serif"
-                                               style="font-family: 'Arial', sans-serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Verdana, sans-serif"
-                                               style="font-family: 'Verdana', sans-serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Tahoma, sans-serif"
-                                               style="font-family: 'Tahoma', sans-serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Trebuchet MS, sans-serif"
-                                               style="font-family: 'Trebuchet MS', sans-serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Georgia, serif"
-                                               style="font-family: 'Georgia', serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Times New Roman, serif"
-                                               style="font-family: 'Times New Roman', serif" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Courier New, monospace"
-                                               style="font-family: 'Courier New', monospace" tabindex="0"/>
-
-                                        <input class="btn col" type="submit" name="font" value="Lucida Console, monospace"
-                                               style="font-family: 'Lucida Console', monospace" tabindex="0"/>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <label> Tamanho da fonte :</label>
-                                    <div class="row m-auto justify-content-around">
-                                        <input type="submit" name="size" value="Pequeno" class="btn btn-lg col"
-                                               style="font-size: 12px">
-                                        <input type="submit" name="size" value="Medio" class="btn btn-lg col"
-                                               style="font-size: 16px">
-                                        <input type="submit" name="size" value="Grande" class="btn btn-lg col"
-                                               style="font-size: 20px">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-    -->
-
-                    <div class="mt-1">
-                        <h4>Customização</h4>
-                        <div class="mt-3">
-                            <label>Cores : </label>
-                            <div class="row row-cols-6 m-auto justify-content-between">
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(239, 68, 68)"
-                                        onclick="customizeCurriculo('color', '#ef4444')"></button>
-                                <button class="btn btn-lg col" type="button"
-                                        style="background-color: rgb(248, 113, 113)"
-                                        onclick="customizeCurriculo('color', '#f87171')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(251, 146, 60)"
-                                        onclick="customizeCurriculo('color', '#fbb23c')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(249, 115, 22)"
-                                        onclick="customizeCurriculo('color', '#f97316')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(245, 158, 11)"
-                                        onclick="customizeCurriculo('color', '#f59e0b')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(251, 191, 36)"
-                                        onclick="customizeCurriculo('color', '#fbbf24')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(34, 197, 94)"
-                                        onclick="customizeCurriculo('color', '#22c55e')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(21, 128, 61)"
-                                        onclick="customizeCurriculo('color', '#15803d')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(56, 189, 248)"
-                                        onclick="customizeCurriculo('color', '#38bdf8')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(14, 165, 233)"
-                                        onclick="customizeCurriculo('color', '#0ea5e9')"></button>
-                                <button class="btn btn-lg col" type="button"
-                                        style="background-color: rgb(129, 140, 248)"
-                                        onclick="customizeCurriculo('color', '#818cf8')"></button>
-                                <button class="btn btn-lg col" type="button" style="background-color: rgb(99, 102, 241)"
-                                        onclick="customizeCurriculo('color', '#6366f1')"></button>
+                                </form>
                             </div>
                         </div>
                         <div class="mt-3">
-                            <label>Fontes :</label>
-                            <div class="row row-cols-2">
-                                <button class="btn col" type="button" style="font-family: 'Arial', sans-serif"
-                                        onclick="customizeCurriculo('font', 'Arial, sans-serif')">Arial
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Verdana', sans-serif"
-                                        onclick="customizeCurriculo('font', 'Verdana, sans-serif')">Verdana
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Tahoma', sans-serif"
-                                        onclick="customizeCurriculo('font', 'Tahoma, sans-serif')">Tahoma
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Trebuchet MS', sans-serif"
-                                        onclick="customizeCurriculo('font', 'Trebuchet MS, sans-serif')">Trebuchet MS
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Georgia', serif"
-                                        onclick="customizeCurriculo('font', 'Georgia, serif')">Georgia
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Times New Roman', serif"
-                                        onclick="customizeCurriculo('font', 'Times New Roman, serif')">Times New Roman
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Courier New', monospace"
-                                        onclick="customizeCurriculo('font', 'Courier New, monospace')">Courier New
-                                </button>
-                                <button class="btn col" type="button" style="font-family: 'Lucida Console', monospace"
-                                        onclick="customizeCurriculo('font', 'Lucida Console, monospace')">Lucida Console
-                                </button>
-                            </div>
+                            <form method="post" action="{{ url_for('customizacao', tipo = 'font') }}">
+                                <label>Fontes :</label>
+                                <div class="row row-cols-2">
+                                    <button class="btn col" type="submit" style="font-family: 'Arial', sans-serif"
+                                            name="font" value="Arial, sans-serif">Arial
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Verdana', sans-serif"
+                                            name="font" value="Verdana, sans-serif">Verdana
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Tahoma', sans-serif"
+                                            name="font" value="Tahoma, sans-serif">Tahoma
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Trebuchet MS', sans-serif"
+                                            name="font" value="Trebuchet MS, sans-serif">Trebuchet MS
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                         <div class="mt-3">
-                            <label> Tamanho da fonte :</label>
-                            <div class="row m-auto justify-content-around">
-                                <button class="btn btn-lg col" type="button" style="font-size: 12px"
-                                        onclick="customizeCurriculo('size', '12px')">Pequeno
-                                </button>
-                                <button class="btn btn-lg col" type="button" style="font-size: 16px"
-                                        onclick="customizeCurriculo('size', '16px')">Medio
-                                </button>
-                                <button class="btn btn-lg col" type="button" style="font-size: 20px"
-                                        onclick="customizeCurriculo('size', '20px')">Grande
-                                </button>
-                            </div>
+                            <form method="post" action="{{ url_for('customizacao', tipo = 'size') }}">
+                                <label> Tamanho da fonte :</label>
+                                <div class="row m-auto justify-content-around">
+                                    <button class="btn btn-lg col" type="submit" style="font-size: 12px"
+                                            name="size" value="12px">Pequeno
+                                    </button>
+                                    <button class="btn btn-lg col" type="submit" style="font-size: 16px"
+                                            name="size" value="16px">Medio
+                                    </button>
+                                    <button class="btn btn-lg col" type="submit" style="font-size: 20px"
+                                            name="size" value="20px">Grande
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-
-                    <script>
-                        function customizeCurriculo(type, value) {
-                            fetch('/customizacao', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({type: type, value: value})
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    document.getElementById('frame').innerHTML = data.curriculo;
-                                })
-                                .catch(error => console.error('Erro:', error));
-                        }
-                    </script>
-
+                
+                    <form method="post" action="{{ url_for('reset_customizacao') }} ">
+                        <button class="btn btn-primary mt-3" href="/reset_customizacao" type="submit">Resetar</button>
+                    </form>
+                
                     <!-- Dados pessoais -->
                     <div class="mt-3">
                         <h4> Dados pessoais </h4>
