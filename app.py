@@ -1,6 +1,6 @@
 ﻿from abc import abstractmethod, ABC
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -123,7 +123,8 @@ class CurriculoPadrao(CurriculoBase):
         self.habilidade = habilidade
 
     def render(self):
-        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao, experiencia=self.experiencia, habilidade=self.habilidade)
+        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao,
+                               experiencia=self.experiencia, habilidade=self.habilidade)
 
 
 class CurriculoDecorator(CurriculoBase):
@@ -141,9 +142,7 @@ class ColorDecorator(CurriculoDecorator):
 
     def render(self):
         rendered_curriculo = super().render()
-        # Adicione lógica para aplicar a cor ao currículo renderizado
-        return rendered_curriculo
-
+        return rendered_curriculo + f"<style>body {{ background-color: {self.color}; }}</style>"
 
 class FontDecorator(CurriculoDecorator):
     def __init__(self, curriculo, font):
@@ -152,8 +151,8 @@ class FontDecorator(CurriculoDecorator):
 
     def render(self):
         rendered_curriculo = super().render()
-        # Adicione lógica para aplicar a fonte ao currículo renderizado
-        return rendered_curriculo
+        return rendered_curriculo + f"<style>body {{ font-family: {self.font}; }}</style>"
+
 
 
 class SizeDecorator(CurriculoDecorator):
@@ -163,8 +162,7 @@ class SizeDecorator(CurriculoDecorator):
 
     def render(self):
         rendered_curriculo = super().render()
-        # Adicione lógica para aplicar o tamanho ao currículo renderizado
-        return rendered_curriculo
+        return rendered_curriculo + f"<style>body {{ font-size: {self.size}; }}</style>"
 
 
 # endregion
@@ -187,14 +185,16 @@ def index():
             formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
             experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
             habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
+            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
+                                   experiencia=experiencia, habilidade=habilidade)
         return render_template('index.html')
 
 
 @app.route('/curriculo', methods=['GET', 'POST'])
 def curriculo():
     if 'usuario' not in session:
-        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.', tipo='danger')
+        return render_template('index.html', mensagem='Você não está logado. Acesso direto não é permitido.',
+                               tipo='danger')
     else:
         usuario = Usuario.query.filter_by(email=session['usuario']).first()
         dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
@@ -205,16 +205,9 @@ def curriculo():
         # Cria o currículo base
         curriculo_base = CurriculoPadrao(dadospessoais, formacao, experiencia, habilidade)
 
-        # Adiciona customizações ao currículo, se houver
-        if 'color' in session:
-            curriculo_base = ColorDecorator(curriculo_base, session['color'])
-        if 'font' in session:
-            curriculo_base = FontDecorator(curriculo_base, session['font'])
-        if 'size' in session:
-            curriculo_base = SizeDecorator(curriculo_base, session['size'])
-
         # Renderiza o currículo
         rendered_curriculo = curriculo_base.render()
+
         return rendered_curriculo
 
     return render_template('index.html', mensagem='Você não está logado.', tipo='danger')
@@ -222,14 +215,34 @@ def curriculo():
 
 @app.route('/customizacao', methods=['POST'])
 def custom_curriculo():
-    if 'usuario' in session:
-        # Recebe a customização do currículo e salva na sessão para renderização
-        session['color'] = request.form.get('color')
-        session['font'] = request.form.get('font')
-        session['size'] = request.form.get('size')
+    if 'usuario' not in session:
         return redirect('/')
-    else:
-        return redirect('/')
+
+    data = request.get_json()
+    customization_type = data.get('type')
+    customization_value = data.get('value')
+
+    usuario = Usuario.query.filter_by(email=session['usuario']).first()
+    dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
+    formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
+    experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
+    habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
+
+    # Cria o currículo base
+    curriculo_base = CurriculoPadrao(dadospessoais, formacao, experiencia, habilidade)
+
+    # Aplica customização
+    if customization_type == 'color':
+        curriculo_base = ColorDecorator(curriculo_base, customization_value)
+    elif customization_type == 'font':
+        curriculo_base = FontDecorator(curriculo_base, customization_value)
+    elif customization_type == 'size':
+        curriculo_base = SizeDecorator(curriculo_base, customization_value)
+
+    # Renderiza o currículo customizado
+    rendered_curriculo = curriculo_base.render()
+
+    return jsonify({'curriculo': rendered_curriculo})
 
 
 @app.route('/add_dadospessoais', methods=['GET', 'POST'])
@@ -285,13 +298,15 @@ def add_dadospessoais():
 def add_experiencia():
     if request.method == 'GET':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
         else:
             return redirect('/')
 
     if request.method == 'POST':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
 
         elif 'usuario' in session:
             # Recupera o usuário logado
@@ -333,13 +348,15 @@ def delete_experiencia(id):
 def add_formacao():
     if request.method == 'GET':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
         else:
             return redirect('/')
 
     if request.method == 'POST':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
 
         elif 'usuario' in session:
             # Recupera o usuário logado
@@ -381,13 +398,15 @@ def delete_formacao(id):
 def add_habilidade():
     if request.method == 'GET':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
         else:
             return redirect('/')
 
     if request.method == 'POST':
         if 'usuario' not in session:
-            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.', tipo='danger')
+            return render_template('index.html', mensagem='Você não está logado. Acesso direto não permitido.',
+                                   tipo='danger')
 
         elif 'usuario' in session:
             # Recupera o usuário logado

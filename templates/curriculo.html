@@ -1,11 +1,4 @@
-﻿<style>
-    font-size: {{ session['font_size'] }};
-</style>
-
-{% if usuario %}
-{% endif %}
-
-{% if dadospessoais %}
+﻿{% if dadospessoais %}
     <h2>{{ dadospessoais.nome }}</h2>
     <p>{{ dadospessoais.titulo }}</p>
     <p>{{ dadospessoais.objetivo }}</p>
@@ -33,4 +26,20 @@
     {% for h in habilidade %}
         <p>{{ h.nome }}</p>
     {% endfor %}
+{% endif %}
+
+{% if session.font %}
+    <style>
+        body {
+            font-family: {{ session.font }};
+        }
+    </style>
+{% endif %}
+
+{% if session.color %}
+    <style>
+        body {
+            background-color: {{ session.color }};
+        }
+    </style>
 {% endif %}
