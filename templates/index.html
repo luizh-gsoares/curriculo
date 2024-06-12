@@ -56,20 +56,36 @@
                 <!-- Lado esquerdo -->
                 <div class="col col-6" style="height: 100vh; overflow-y: auto">
                     <div>
-                        <div class="mt-1">
+                        <div class="mt-3">
                             <h4>Customização</h4>
                             <div class="mt-3">
                                 <form method="post" action="{{ url_for('customizacao', tipo = 'color') }}">
                                     <label>Cores : </label>
                                     <div class="row row-cols-6 m-auto justify-content-between">
-                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(129, 140, 248)"
-                                                value="#818cf8"></button>
-                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(99, 102, 241)"
-                                                value="#6366f1"></button>
-                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(249, 115, 22)"
-                                                value="#f97316"></button>
-                                        <button class="btn btn-lg col" name="color" type="submit" style="background-color: rgb(239, 68, 68)"
-                                                value="#ef4444"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(248, 113, 113)" value="#f87171"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(239, 68, 68)" value="#ef4444"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(251, 146, 60)" value="#fbb23c"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(249, 115, 22)" value="#f97316"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(245, 158, 11)" value="#f59e0b"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(251, 191, 36)" value="#fbbf24"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(34, 197, 94)" value="#22c55e"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(21, 128, 61)" value="#15803d"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(56, 189, 248)" value="#38bdf8"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(14, 165, 233)" value="#0ea5e9"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(129, 140, 248)" value="#818cf8"></button>
+                                        <button class="btn btn-lg col" name="color" type="submit"
+                                                style="background-color: rgb(99, 102, 241)" value="#6366f1"></button>
                                     </div>
                                 </form>
                             </div>
@@ -87,8 +103,22 @@
                                     <button class="btn col" type="submit" style="font-family: 'Tahoma', sans-serif"
                                             name="font" value="Tahoma, sans-serif">Tahoma
                                     </button>
-                                    <button class="btn col" type="submit" style="font-family: 'Trebuchet MS', sans-serif"
-                                            name="font" value="Trebuchet MS, sans-serif">Trebuchet MS
+                                    <button class="btn col" type="submit"
+                                            style="font-family: 'Trebuchet MS', sans-serif" name="font"
+                                            value="Trebuchet MS, sans-serif">Trebuchet MS
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Georgia', serif"
+                                            name="font" value="Georgia, serif">Georgia
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Times New Roman', serif"
+                                            name="font" value="Times New Roman, serif">Times New Roman
+                                    </button>
+                                    <button class="btn col" type="submit" style="font-family: 'Courier New', monospace"
+                                            name="font" value="Courier New, monospace">Courier New
+                                    </button>
+                                    <button class="btn col" type="submit"
+                                            style="font-family: 'Lucida Console', monospace" name="font"
+                                            value="Lucida Console, monospace">Lucida Console
                                     </button>
                                 </div>
                             </form>
@@ -110,11 +140,11 @@
                             </form>
                         </div>
                     </div>
-                
+
                     <form method="post" action="{{ url_for('reset_customizacao') }} ">
                         <button class="btn btn-primary mt-3" href="/reset_customizacao" type="submit">Resetar</button>
                     </form>
-                
+
                     <!-- Dados pessoais -->
                     <div class="mt-3">
                         <h4> Dados pessoais </h4>
@@ -167,8 +197,7 @@
                                           name="objetivo">{{ dadospessoais.objetivo if dadospessoais else '' }}</textarea>
                                     <label for="floatingInput" class="form-label"> Objetivo </label>
                                     <button class="btn btn-primary" id="objetivo" type="button"
-                                            style="position: absolute; bottom: 0; right: 0;"
-                                            onclick="chatgpt()">
+                                            style="position: absolute; bottom: 0; right: 0;" onclick="chatgpt()">
                                         IA</i>
                                     </button>
                                 </div>
@@ -229,10 +258,13 @@
                                 <textarea class="form-control" id="exp_descricao" rows="3" name="descricao"></textarea>
                             </div>
 
+                            <button type="button" class="btn btn-secondary mt-3" onclick="closeForm('experiencia')">
+                                Fechar
+                            </button>
                             <button class="btn btn-primary mt-3"> Salvar</button>
                         </form>
 
-                        <div class="py-3">
+                        <div class="py-3" id="addExpButton" style="display: block;">
                             <button class="btn btn-success" onclick="showForm('experiencia')">Adicionar Experiência
                             </button>
                         </div>
@@ -288,10 +320,13 @@
                                 <textarea class="form-control" id="for_descricao" rows="3" name="descricao"></textarea>
                             </div>
 
+                            <button type="button" class="btn btn-secondary mt-3" onclick="closeForm('formacao')">
+                                Fechar
+                            </button>
                             <button class="btn btn-primary mt-3"> Salvar</button>
                         </form>
 
-                        <div class="py-3">
+                        <div class="py-3" id="addForButton" style="display: block;">
                             <button class="btn btn-success" onclick="showForm('formacao')">Adicionar Formação</button>
                         </div>
                     </div>
@@ -417,6 +452,42 @@
 </div>
 <!-- Modal Cadastro -->
 
+<!-- Modal ChatGPT -->
+<div class="modal" id="chatgptModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ChatGPT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <p> Olá! Eu sou o ChatGPT, um assistente de texto que pode te ajudar a escrever o seu objetivo
+                    profissional. </p>
+                <p> É muito simples ! Digite seu título profissional e eu irei gerar um texto para você.</p>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingInput"
+                           placeholder="Digite seu título profisisonal">
+                    <label for="floatingInput">Digite seu título profissional</label>
+                </div>
+
+                <!-- Respostas -->
+                <div>
+                    <p> Resposta : </p>
+                    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ac nunc ultricies
+                        fermentum. </p>
+                </div>
+
+                <button type="button" class="btn btn-success">Aceitar</button>
+                <button type="button" class="btn btn-danger" bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Mensagem de alerta -->
 {% if mensagem %}
     <div id="autoCloseAlert" class="alert alert-dismissible alert-{{ tipo }} position-fixed bottom-0 end-0 mb-3 me-3"
@@ -463,9 +534,40 @@
     function showForm(id) {
         if (id == 'experiencia') {
             document.getElementById('experiencia_form').style.display = 'block';
+            document.getElementById('addExpButton').style.display = 'none';
+
         } else if (id == 'formacao') {
             document.getElementById('formacao_form').style.display = 'block';
+            document.getElementById('addForButton').style.display = 'none';
         }
+    }
+
+    // Fecha o formulário
+    function closeForm(id) {
+        if (id == 'experiencia') {
+            document.getElementById('experiencia_form').style.display = 'none';
+            document.getElementById('addExpButton').style.display = 'block';
+        } else if (id == 'formacao') {
+            document.getElementById('formacao_form').style.display = 'none';
+            document.getElementById('addForButton').style.display = 'block';
+        }
+
+        clearFields();
+    }
+
+    // Limpa os campos
+    function clearFields() {
+        document.getElementById('exp_cargo').value = '';
+        document.getElementById('exp_empresa').value = '';
+        document.getElementById('exp_data').value = '';
+        document.getElementById('exp_descricao').value = '';
+        document.getElementById('exp_id').value = '';
+
+        document.getElementById('for_curso').value = '';
+        document.getElementById('for_instituicao').value = '';
+        document.getElementById('for_data').value = '';
+        document.getElementById('for_descricao').value = '';
+        document.getElementById('for_id').value = '';
     }
 
     // Imprime o currículo
@@ -473,6 +575,15 @@
         var iframe = document.querySelector('iframe');
         iframe.contentWindow.print();
     }
+
+    // ChatGPT Modal
+    function chatgpt() {
+        var chatgpt = new bootstrap.Modal(document.getElementById('chatgptModal'), {
+            keyboard: false
+        });
+        chatgpt.show();
+    }
+
 
 </script>
 </body>

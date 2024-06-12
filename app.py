@@ -118,9 +118,11 @@ class Curriculo:
         self.habilidade = habilidade
 
     def render(self):
-        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao, experiencia=self.experiencia,
+        return render_template('curriculo.html',
+                               dadospessoais=self.dadospessoais,
+                               formacao=self.formacao,
+                               experiencia=self.experiencia,
                                habilidade=self.habilidade)
-
 
 class CurriculoDecorator(Curriculo):
     def __init__(self, curriculo):
@@ -129,7 +131,6 @@ class CurriculoDecorator(Curriculo):
     def render(self):
         return self.curriculo.render()
 
-
 class ColorDecorator(CurriculoDecorator):
     def __init__(self, curriculo, color):
         super().__init__(curriculo)
@@ -137,8 +138,7 @@ class ColorDecorator(CurriculoDecorator):
 
     def render(self):
         rendered = super().render()
-        return rendered + f"<div style='color: {self.color};'>{super().render()}</div>"
-
+        return f"<div style='color: {self.color};'>{rendered}</div>"
 
 class FontDecorator(CurriculoDecorator):
     def __init__(self, curriculo, font):
@@ -147,8 +147,7 @@ class FontDecorator(CurriculoDecorator):
 
     def render(self):
         rendered = super().render()
-        return rendered + f"<div style='font-family: {self.font};'>{super().render()}</div>"
-
+        return f"<div style='font-family: {self.font};'>{rendered}</div>"
 
 class SizeDecorator(CurriculoDecorator):
     def __init__(self, curriculo, size):
@@ -157,7 +156,8 @@ class SizeDecorator(CurriculoDecorator):
 
     def render(self):
         rendered = super().render()
-        return rendered + f"<div style='font-size: {self.size};'>{super().render()}</div>"
+        return f"<div style='font-size: {self.size};'>{rendered}</div>"
+
 
 # endregion
 
@@ -179,13 +179,13 @@ def index():
             formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
             experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
             habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade)
+            return render_template('index.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao,
+                                   experiencia=experiencia, habilidade=habilidade)
         return render_template('index.html')
 
 
 @app.route('/curriculo', methods=['GET', 'POST'])
 def curriculo():
-    # Verifica se a sessão de customizações existe, se não, cria uma nova com os valores padrão
     if 'customizations' not in session:
         session['customizations'] = [
             ('color', '#000000'),
@@ -193,18 +193,24 @@ def curriculo():
             ('size', '16px')
         ]
 
-    # Recupera o usuário logado
     usuario = Usuario.query.filter_by(email=session['usuario']).first()
     dadospessoais = DadosPessoais.query.filter_by(usuario_id=usuario.id).first()
     formacao = Formacao.query.filter_by(usuario_id=usuario.id).order_by(Formacao.data.desc()).all()
     experiencia = Experiencia.query.filter_by(usuario_id=usuario.id).order_by(Experiencia.data.desc()).all()
     habilidade = Habilidade.query.filter_by(usuario_id=usuario.id).all()
-    
-    # Cria o currículo
+
     curriculo = Curriculo(dadospessoais, formacao, experiencia, habilidade)
 
-    return render_template('curriculo.html', usuario=usuario, dadospessoais=dadospessoais, formacao=formacao, experiencia=experiencia, habilidade=habilidade,
-                           scustomizations=session['customizations'])
+    # Aplica todas as customizações em ordem
+    for customization in session['customizations']:
+        if customization[0] == 'color':
+            curriculo = ColorDecorator(curriculo, customization[1])
+        elif customization[0] == 'font':
+            curriculo = FontDecorator(curriculo, customization[1])
+        elif customization[0] == 'size':
+            curriculo = SizeDecorator(curriculo, customization[1])
+
+    return curriculo.render()
 
 
 @app.route('/customizacao/<tipo>', methods=['GET', 'POST'])
@@ -483,6 +489,12 @@ def logout():
         return render_template('index.html',
                                mensagem='Você não está logado. Acesso direto não é permitido.',
                                tipo='danger')
+
+
+
+@app.route('/chatgpt/<campo>', methods=['GET', 'POST'])
+def chatgpt(campo):
+
 
 
 # endregion
