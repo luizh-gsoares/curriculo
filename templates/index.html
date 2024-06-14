@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <title>Criador de currículo</title>
@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="../static/css/bootstrap.min.css"/>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <!-- JQuery CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
 <!-- Navbar-->
@@ -142,7 +144,7 @@
                     </div>
 
                     <form method="post" action="{{ url_for('reset_customizacao') }} ">
-                        <button class="btn btn-primary mt-3" href="/reset_customizacao" type="submit">Resetar</button>
+                        <button class="btn btn-primary mt-3" href="/reset_customizacao" type="submit">Limpar</button>
                     </form>
 
                     <!-- Dados pessoais -->
@@ -193,13 +195,12 @@
                                 </div>
 
                                 <div class="form-floating mb-3">
-                                <textarea class="form-control" style="height: 120px;" id="floatingInput" rows="5"
-                                          name="objetivo">{{ dadospessoais.objetivo if dadospessoais else '' }}</textarea>
+                                    <button class="btn btn-primary" type="button"
+                                            style="position: absolute; bottom: 0; right: 0;" onclick="chatgpt()"><i
+                                            class="fa-solid fa-robot"></i></button>
+                                    <textarea class="form-control" style="height: 120px;" id="objetivo" rows="5"
+                                              name="objetivo">{{ dadospessoais.objetivo if dadospessoais else '' }}</textarea>
                                     <label for="floatingInput" class="form-label"> Objetivo </label>
-                                    <button class="btn btn-primary" id="objetivo" type="button"
-                                            style="position: absolute; bottom: 0; right: 0;" onclick="chatgpt()">
-                                        IA</i>
-                                    </button>
                                 </div>
 
                             </div>
@@ -410,8 +411,11 @@
                         <input type="password" id="senha" name="senha" class="form-control"/>
                     </div>
 
-                    <!-- Submit button -->
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+                    <div class="py-2">
+                        <!-- Submit button -->
+                        <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -443,8 +447,24 @@
                         <input type="password" id="senha" name="senha" class="form-control"/>
                     </div>
 
+
+                    <!-- Campo requisitos senha -->
+                    <div class="card border-info">
+                        <div class="card-body">
+                            <small class="text-muted">
+                                Sua senha deve ter mais de 8 caracteres, conter letras maiúsculas e minúsculas, um
+                                número e
+                                um
+                                caractere especial.
+                            </small>
+                        </div>
+                    </div>
+
+
                     <!-- Submit button -->
-                    <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+                    <div class="py-2">
+                        <button type="submit" class="btn btn-primary btn-block">Registrar</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -463,26 +483,32 @@
                 </button>
             </div>
             <div class="modal-body">
-
-                <p> Olá! Eu sou o ChatGPT, um assistente de texto que pode te ajudar a escrever o seu objetivo
-                    profissional. </p>
-                <p> É muito simples ! Digite seu título profissional e eu irei gerar um texto para você.</p>
-
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="floatingInput"
-                           placeholder="Digite seu título profisisonal">
-                    <label for="floatingInput">Digite seu título profissional</label>
-                </div>
-
-                <!-- Respostas -->
                 <div>
-                    <p> Resposta : </p>
-                    <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ac nunc ultricies
-                        fermentum. </p>
+                    <p> Olá! Eu sou o ChatGPT, um assistente de texto que pode te ajudar a escrever o seu objetivo
+                        profissional. </p>
+                    <p> É muito simples ! Digite seu título profissional e eu irei gerar um texto para você.</p>
                 </div>
 
-                <button type="button" class="btn btn-success">Aceitar</button>
-                <button type="button" class="btn btn-danger" bs-dismiss="modal">Fechar</button>
+                <div class="row">
+                    <div class="mb-3 col col-9">
+                        <input type="text" class="form-control" id="tituloProfissional"
+                               placeholder="Digite seu título profissional">
+                    </div>
+                    <div class="col col-3 align-self-auto">
+                        <button class="btn btn-primary" id="btnGerar"><i class="fa-solid fa-robot"></i> Gerar</button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <p>Resultado:</p>
+                    <div id="tituloResposta"></div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnAceitar" data-bs-dismiss="modal">Aceitar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="clearFields()">Fechar
+                </button>
             </div>
         </div>
     </div>
@@ -503,6 +529,7 @@
 
 <!-- Javascript -->
 <script>
+
     // Auto close alert
     window.onload = function () {
         setTimeout(function () {
@@ -568,6 +595,11 @@
         document.getElementById('for_data').value = '';
         document.getElementById('for_descricao').value = '';
         document.getElementById('for_id').value = '';
+
+        // Limpa o campo do ChatGPT
+        document.getElementsByName('campoChatGPT').forEach((element) => {
+            element.value = '';
+        });
     }
 
     // Imprime o currículo
@@ -584,7 +616,28 @@
         chatgpt.show();
     }
 
+    $(document).ready(function () {
+        // Enviar o título profissional via AJAX quando o botão "Gerar" for clicado
+        $('#btnGerar').on('click', function () {
+            const titulo = $('#tituloProfissional').val();
+            $.ajax({
+                url: '/chatgpt/titulo',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({titulo: titulo}),
+                success: function (response) {
+                    $('#tituloResposta').html(response);
+                }
+            });
+        });
 
+        // Substituir o campo objetivo com a resposta quando o botão "Aceitar" for clicado
+        $('#btnAceitar').on('click', function () {
+            const resposta = $('#tituloResposta').text();
+            $('#objetivo').val(resposta);
+            $('#tituloModal').modal('hide');
+        });
+    });
 </script>
 </body>
 </html>
