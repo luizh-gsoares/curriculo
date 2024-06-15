@@ -1,7 +1,7 @@
 import re
 from abc import abstractmethod, ABC
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, session, redirect, jsonify
+from flask import Flask, render_template
 from flask_sqlalchemy.session import Session
 from openai import OpenAI
 import datetime
@@ -11,14 +11,13 @@ app = Flask(__name__)
 app.secret_key = '4N4K1N5KYW4LK3R'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///curriculo.sqlite3'
 app.app_context().push()
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=10)
-# client = OpenAI(api_key='CHAVE AQUI')
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=30)
+client = OpenAI(api_key='CHAVE_AQUI')
 
 
 # endregion
 
 ################ Models       ################
-# region
 
 # region  Padrão de Projeto Criacional - Singleton para o BD
 class Database:
@@ -178,7 +177,7 @@ class ValidationStrategy(ABC):
         pass
 
 
-class UserValidator:
+class InputsValidator:
     def __init__(self, strategy: ValidationStrategy):
         self._strategy = strategy
 
@@ -199,7 +198,7 @@ class EmailValidation(ValidationStrategy):
 
 class EmailAlreadyExistsValidation(ValidationStrategy):
     def validate(self, data):
-        email = db.session.query(Usuario).filter(Usuario.email == data).first()
+        email = usuario_service.get_usuario_by_email(data)
         if email:
             return False
         return True
@@ -213,11 +212,14 @@ class PasswordValidation(ValidationStrategy):
         return False
 
 
-class clearInputValidation(ValidationStrategy):
+class EmptyInputValidation(ValidationStrategy):
+    # Verifica se o campo está vazio
     def validate(self, data):
-        if data == "":
-            return False
+        for key, value in data.items():
+            if not value:
+                return False
         return True
+
 
 # endregion
 
@@ -229,7 +231,8 @@ with app.app_context():
 
 # endregion
 
-# endregion
+################ Models       ################
+
 
 ################ Repositories ################
 # region
@@ -251,8 +254,11 @@ class BaseRepository:
     def get_by_id(self, entity_class, entity_id):
         return self.session.query(entity_class).get(entity_id)
 
-    def get_all(self, entity_class):
-        return self.session.query(entity_class).all()
+    def get_all_by_user_id(self, entity_class, user_id):
+        return self.session.query(entity_class).filter(entity_class.usuario_id == user_id).all()
+
+    def get_by_email(self, entity_class, email):
+        return self.session.query(entity_class).filter(entity_class.email == email).first()
 
 
 class DadosPessoaisRepository(BaseRepository):
@@ -275,11 +281,27 @@ class UsuarioRepository(BaseRepository):
     pass
 
 
+class CurriculoRepository(BaseRepository):
+    pass
+
+
 # endregion
 ################ Repositories ################
 
 ################ Services ################
 # region
+class UsuarioService:
+    def __init__(self, usuario_repository: UsuarioRepository):
+        self.usuario_repository = usuario_repository
+
+    def create_usuario(self, usuario_data):
+        usuario = Usuario(**usuario_data)
+        self.usuario_repository.add(usuario)
+
+    def get_usuario_by_email(self, email):
+        return self.usuario_repository.get_by_email(Usuario, email)
+
+
 class DadosPessoaisService:
     def __init__(self, dadospessoais_repository: DadosPessoaisRepository):
         self.dadospessoais_repository = dadospessoais_repository
@@ -294,15 +316,36 @@ class DadosPessoaisService:
             setattr(dadospessoais, key, value)
         self.dadospessoais_repository.update()
 
-    def delete_dadospessoais(self, dadospessoais_id):
-        dadospessoais = self.dadospessoais_repository.get_by_id(DadosPessoais, dadospessoais_id)
-        self.dadospessoais_repository.delete(dadospessoais)
+    def get_dadospessoais_by_user_id(self, user_id):
+        result = self.dadospessoais_repository.get_all_by_user_id(DadosPessoais, user_id)
+        if result:
+            return result[0]
+        return None
 
-    def get_dadospessoais_by_id(self, dadospessoais_id):
-        return self.dadospessoais_repository.get_by_id(DadosPessoais, dadospessoais_id)
 
-    def get_all_formacoes(self):
-        return self.dadospessoais_repository.get_all(DadosPessoais)
+class ExperienciaService:
+    def __init__(self, experiencia_repository: ExperienciaRepository):
+        self.experiencia_repository = experiencia_repository
+
+    def create_experiencia(self, experiencia_data):
+        experiencia = Experiencia(**experiencia_data)
+        self.experiencia_repository.add(experiencia)
+
+    def update_experiencia(self, experiencia_id, experiencia_data):
+        experiencia = self.experiencia_repository.get_by_id(Experiencia, experiencia_id)
+        for key, value in experiencia_data.items():
+            setattr(experiencia, key, value)
+        self.experiencia_repository.update()
+
+    def delete_experiencia(self, experiencia_id):
+        experiencia = self.experiencia_repository.get_by_id(Experiencia, experiencia_id)
+        self.experiencia_repository.delete(experiencia)
+
+    def get_experiencia_by_id(self, experiencia_id):
+        return self.experiencia_repository.get_by_id(Experiencia, experiencia_id)
+
+    def get_experiencia_by_user_id(self, user_id):
+        return self.experiencia_repository.get_all_by_user_id(Experiencia, user_id)
 
 
 class FormacaoService:
@@ -326,5 +369,69 @@ class FormacaoService:
     def get_formacao_by_id(self, formacao_id):
         return self.formacao_repository.get_by_id(Formacao, formacao_id)
 
-    def get_all_formacoes(self):
-        return self.formacao_repository.get_all(Formacao)
+    def get_formacao_by_user_id(self, user_id):
+        return self.formacao_repository.get_all_by_user_id(Formacao, user_id)
+
+
+class HabilidadeService:
+    def __init__(self, habilidade_repository: HabilidadeRepository):
+        self.habilidade_repository = habilidade_repository
+
+    def create_habilidade(self, habilidade_data):
+        habilidade = Habilidade(**habilidade_data)
+        self.habilidade_repository.add(habilidade)
+
+    def delete_habilidade(self, habilidade_id):
+        habilidade = self.habilidade_repository.get_by_id(Habilidade, habilidade_id)
+        self.habilidade_repository.delete(habilidade)
+
+    def get_habilidade_by_id(self, habilidade_id):
+        return self.habilidade_repository.get_by_id(Habilidade, habilidade_id)
+
+    def get_habilidade_by_user_id(self, user_id):
+        return self.habilidade_repository.get_all_by_user_id(Habilidade, user_id)
+
+
+class CurriculoService:
+    def __init__(self, usuario_repository, dadospessoais_repository, formacao_repository, experiencia_repository,
+                 habilidade_repository):
+        self.usuario_repository = usuario_repository
+        self.dadospessoais_repository = dadospessoais_repository
+        self.formacao_repository = formacao_repository
+        self.experiencia_repository = experiencia_repository
+        self.habilidade_repository = habilidade_repository
+
+    def get_curriculo(self, user_id):
+        dadospessoais = self.dadospessoais_repository.get_all_by_user_id(DadosPessoais, user_id)
+        formacao = self.formacao_repository.get_all_by_user_id(Formacao, user_id)
+        experiencia = self.experiencia_repository.get_all_by_user_id(Experiencia, user_id)
+        habilidade = self.habilidade_repository.get_all_by_user_id(Habilidade, user_id)
+
+        return {
+            # Retorna o primeiro dado pessoal, fiz assim para evitar erros de index
+            'dadospessoais': dadospessoais[0] if dadospessoais else None,
+            'formacao': formacao,
+            'experiencia': experiencia,
+            'habilidade': habilidade
+        }
+
+
+# endregion
+################ Services ################
+
+# Inicialização dos Repositories
+usuario_repository = UsuarioRepository(db.session)
+dadospessoais_repository = DadosPessoaisRepository(db.session)
+experiencia_repository = ExperienciaRepository(db.session)
+formacao_repository = FormacaoRepository(db.session)
+habilidade_repository = HabilidadeRepository(db.session)
+curriculo_repository = CurriculoRepository(db.session)
+
+# Inicialização dos Services
+usuario_service = UsuarioService(UsuarioRepository(db.session))
+dadospessoais_service = DadosPessoaisService(DadosPessoaisRepository(db.session))
+experiencia_service = ExperienciaService(ExperienciaRepository(db.session))
+formacao_service = FormacaoService(FormacaoRepository(db.session))
+habilidade_service = HabilidadeService(HabilidadeRepository(db.session))
+curriculo_service = CurriculoService(usuario_repository, dadospessoais_repository, formacao_repository,
+                                     experiencia_repository, habilidade_repository)

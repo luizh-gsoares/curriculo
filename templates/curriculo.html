@@ -2,37 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Currículo</title>
 </head>
 <body>
-    {% if dadospessoais %}
-        <h2>{{ dadospessoais.nome }}</h2>
-        <p>{{ dadospessoais.titulo }}</p>
-        <p>{{ dadospessoais.objetivo }}</p>
-        <p>{{ dadospessoais.endereco }}</p>
-        <p>{{ dadospessoais.site }}</p>
-        <p>{{ dadospessoais.telefone }}</p>
-    {% endif %}
+{% if dadospessoais %}
+    <h2>{{ dadospessoais.nome }}</h2>
+    <p>{{ dadospessoais.titulo }}</p>
+    <p>{{ dadospessoais.objetivo }}</p>
+    <p>{{ dadospessoais.endereco }}</p>
+    <p>{{ dadospessoais.site }}</p>
+    <p>{{ dadospessoais.telefone }}</p>
+{% endif %}
 
-    {% if formacao %}
-        <h3>Formação:</h3>
-        {% for f in formacao %}
-            <p>{{ f.curso }} na {{ f.instituicao }} em {{ f.data }}. Descrição: {{ f.descricao }}</p>
-        {% endfor %}
-    {% endif %}
+{% if formacao %}
+    <h3>Formação:</h3>
+    {% for f in formacao %}
+        <p>{{ f.curso }} na {{ f.instituicao }} em {{ f.data }}. Descrição: {{ f.descricao }}</p>
+    {% endfor %}
+{% endif %}
 
-    {% if experiencia %}
-        <h3>Experiência:</h3>
-        {% for e in experiencia %}
-            <p>{{ e.cargo }} na {{ e.empresa }} em {{ e.data }}. Descrição: {{ e.descricao }}</p>
-        {% endfor %}
-    {% endif %}
+{% if experiencia %}
+    <h3>Experiência:</h3>
+    {% for e in experiencia %}
+        <p>{{ e.cargo }} na {{ e.empresa }} em {{ e.data }}. Descrição: {{ e.descricao }}</p>
+    {% endfor %}
+{% endif %}
 
-    {% if habilidade %}
-        <h3>Habilidades:</h3>
-        {% for h in habilidade %}
-            <p>{{ h.nome }}</p>
-        {% endfor %}
-    {% endif %}
+{% if habilidade %}
+    <h3>Habilidades:</h3>
+    {% for h in habilidade %}
+        <p>{{ h.nome }}</p>
+    {% endfor %}
+{% endif %}
 </body>
 </html>
