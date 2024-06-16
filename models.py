@@ -1,10 +1,12 @@
 import re
 from abc import abstractmethod, ABC
+from sqlalchemy.orm import declared_attr
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template
-from flask_sqlalchemy.session import Session
 from openai import OpenAI
 import datetime
+
+
 
 # region Configurações
 app = Flask(__name__)
@@ -13,6 +15,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///curriculo.sqlite3'
 app.app_context().push()
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=30)
 client = OpenAI(api_key='CHAVE_AQUI')
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 # endregion
@@ -50,7 +53,10 @@ class Usuario(db.Model):
 class BaseModel(db.Model):
     __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
+
+    @declared_attr
+    def usuario_id(cls):
+        return db.Column(db.Integer, db.ForeignKey('usuario.id'))
 
     def __init__(self, usuario_id):
         self.usuario_id = usuario_id
@@ -237,7 +243,8 @@ with app.app_context():
 ################ Repositories ################
 # region
 class BaseRepository:
-    def __init__(self, session: Session):
+    # Usando o Singleton para o banco de dados
+    def __init__(self, session: db):
         self.session = session
 
     def add(self, entity):

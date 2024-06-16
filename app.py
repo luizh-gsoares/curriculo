@@ -88,7 +88,7 @@ def customizacao(tipo):
 # Endpoint : Reset Customizacao
 # Método : POST
 # Descrição : Reseta as customizações do currículo, removendo todas as customizações da sessão.k
-@app.route('/reset_customizacao', methods=['POST'])
+@app.route('/reset_customizacao', methods=['GET', 'POST'])
 def reset_customizacao():
     # Remove as customizações da sessão
     session.pop('customizations', None)
@@ -99,7 +99,7 @@ def reset_customizacao():
 # Endpoint : Dadospessoais
 # Método : POST
 # Descrição : Adiciona os dados pessoais do usuário, como nome, email, telefone, endereço, site, objetivo e título.
-@app.route('/dadospessoais', methods=['POST'])
+@app.route('/dadospessoais', methods=['GET', 'POST'])
 def dadospessoais():
     if request.method == 'POST':
         if 'usuario' in session:
@@ -141,7 +141,7 @@ def dadospessoais():
 # Endpoint : Experiencia
 # Método : POST
 # Descrição : Manipula as experiências do usuário, como cargo, empresa, data e descrição.
-@app.route('/experiencia', methods=['POST'])
+@app.route('/experiencia', methods=['GET', 'POST'])
 def experiencia():
     if request.method == 'POST':
         if 'usuario' in session:
@@ -208,7 +208,7 @@ def delete_experiencia(id):
 # Endpoint : add_formacao
 # Método : POST
 # Descrição : Adiciona ou atualiza a formação do usuário, como curso, instituição, data e descrição.
-@app.route('/formacao', methods=['POST'])
+@app.route('/formacao', methods=['GET', 'POST'])
 def formacao():
     if request.method == 'POST':
         if 'usuario' in session:
@@ -487,5 +487,4 @@ def logout():
 
 if __name__ == '__main__':
     db.create_all()
-    session.clear()
     app.run(debug=True)
