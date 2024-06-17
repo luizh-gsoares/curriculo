@@ -6,8 +6,6 @@ from flask import Flask, render_template
 from openai import OpenAI
 import datetime
 
-
-
 # region Configurações
 app = Flask(__name__)
 app.secret_key = '4N4K1N5KYW4LK3R'
@@ -129,11 +127,7 @@ class Curriculo:
         self.habilidade = habilidade
 
     def render(self):
-        return render_template('curriculo.html',
-                               dadospessoais=self.dadospessoais,
-                               formacao=self.formacao,
-                               experiencia=self.experiencia,
-                               habilidade=self.habilidade)
+        return render_template('curriculo.html', dadospessoais=self.dadospessoais, formacao=self.formacao, experiencia=self.experiencia, habilidade=self.habilidade)
 
 
 class CurriculoDecorator(Curriculo):
